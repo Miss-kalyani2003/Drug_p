@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Drug Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f5f5f5;
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.85)),
+                url("{{ url_for('static', filename='images/bg.jpg') }}")
+                no-repeat center center fixed;
+            background-size: cover;
+        }
+        .card {
+            width: 430px;
+            padding: 24px 26px 30px;
+            border-radius: 14px;
+            background: rgba(15, 15, 15, 0.86);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+        }
+        .card h2 {
+            margin: 0 0 4px;
+            font-weight: 600;
+        }
+        .subtitle {
+            margin-bottom: 16px;
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        label {
+            display: block;
+            margin: 8px 0 4px;
+            font-size: 13px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.06);
+            color: #f5f5f5;
+            outline: none;
+        }
+        input:focus, select:focus {
+            border-color: #ffa94d;
+            background: rgba(255,255,255,0.10);
+        }
+        button {
+            width: 100%;
+            margin-top: 16px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #ffa94d, #fd7e14);
+            color: white;
+            font-weight: 600;
+        }
+        button:hover {
+            opacity: 0.96;
+        }
+        #result {
+            margin-top: 14px;
+            font-size: 14px;
+            color: #ffd43b;
+            min-height: 18px;
+        }
+        .links {
+            margin-top: 12px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .links a {
+            color: #74c0fc;
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Drug Prediction</h2>
+    <div class="subtitle">Enter patient details to get the predicted drug</div>
+
+    <form id="predictForm">
+        <label>Age</label>
+        <input type="number" name="Age" min="1" max="120" required>
+
+        <label>Sex</label>
+        <select name="Sex" required>
+            <option value="">Select</option>
+            <option value="F">Female</option>
+            <option value="M">Male</option>
+        </select>
+
+        <label>Blood Pressure (BP)</label>
+        <select name="BP" required>
+            <option value="">Select</option>
+            <option value="LOW">LOW</option>
+            <option value="NORMAL">NORMAL</option>
+            <option value="HIGH">HIGH</option>
+        </select>
+
+        <label>Cholesterol</label>
+        <select name="Cholesterol" required>
+            <option value="">Select</option>
+            <option value="NORMAL">NORMAL</option>
+            <option value="HIGH">HIGH</option>
+        </select>
+
+        <label>Na_to_K</label>
+        <input type="number" step="0.01" name="Na_to_K" required>
+
+        <button type="submit">Predict Drug</button>
+    </form>
+
+    <div id="result"></div>
+
+    <div class="links">
+        <a href="/login_page">Back to Login</a>
+        <a href="/register_page">Register new user</a>
+    </div>
+</div>
+
+<script>
+const token = localStorage.getItem("jwtToken");
+
+document.getElementById("predictForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    if (!token) {
+        document.getElementById("result").innerText = "Please login first. Token not found.";
+        return;
+    }
+
+    let formData = new FormData(this);
+
+    const res = await fetch("/prediction", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        body: formData
+    });
+
+    const data = await res.json();
+    document.getElementById("result").innerText =
+        "Predicted Drug: " + data["predict Drug"];
+});
+</script>
+
+</body>
+</html>
